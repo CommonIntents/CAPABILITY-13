@@ -171,6 +171,8 @@ CISS completes cryptographic identity proof within the first millisecond of conn
 
 CISS provides a **long-term identity key** (the Agent's private key certificate). CAP issues a **short-lived operational credential** (JWT) on top of it. Long-term identity is not directly used for operational authorization; operational authorization MUST pass through a time-bound credential.
 
+**Platform Independence**: The CAP protocol specification itself is published via content addressing (CID), independent of any specific platform. The decision queue can be implemented using any compatible message queue infrastructure (e.g., SQLite, Redis, Kafka); the protocol does not mandate any specific technology stack.
+
 ---
 
 ## 8. Future Direction
