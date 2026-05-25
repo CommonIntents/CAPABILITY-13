@@ -15,7 +15,7 @@ CAP (Capability Authentication Protocol) is the **capability authentication and 
 
 It defines "who can do what, under what conditions, within what timeframe." It transforms permissions from static passes into a dynamic, time-bound, evaluable trust process.
 
-CAP is the **immune system** of the protocol stack — dynamic defense, activated on demand.
+CAP is the **consensus anchor** of the protocol stack — what you see is what you sign.
 
 ---
 
@@ -23,7 +23,7 @@ CAP is the **immune system** of the protocol stack — dynamic defense, activate
 
 CIS defines "what AI wants to do"; CAP defines "what AI can do, under what conditions, within what timeframe."
 
-CIS and CAP are connected through the **Manifest** — the Manifest declares which CIS intents an application supports and the security constraints for each intent. CIS intents are the semantic source of the `name` field in the `actions` array of the Manifest.
+CIS and CAP are connected through the **Manifest** — the Manifest declares which CIS intents an application supports and the security constraints for each intent. CIS intents are the syntactic source of the `name` field in the `actions` array of the Manifest.
 
 CISS provides identity proof at the transport layer (mTLS). CAP performs dynamic authorization based on this already-proven identity.
 
