@@ -1,4 +1,4 @@
-# CAP: Capability Authentication Protocol
+# CAP: Consensus Authentication Protocol
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Version](https://img.shields.io/badge/Version-0.1.0--draft-orange.svg)]() [![Status](https://img.shields.io/badge/Status-RFC%20Draft-yellow.svg)]() [![Org](https://img.shields.io/badge/Org-CommonIntents-darkgray.svg)](https://github.com/CommonIntents)
 
@@ -59,7 +59,7 @@ Every CAP-compatible application MUST publish a capability manifest, declaring t
 }
 ```
 
-The `name` field declared in the Manifest corresponds to CIS intent semantics. `securityClass` determines whether this action requires HITL approval. When the `lease` field exists, the Lease Extension is activated; when absent, the operation involves no time-bound constraints.
+The `name` field declared in the Manifest corresponds to CIS intent syntax. `securityClass` determines whether this action requires HITL approval. When the `lease` field exists, the Lease Extension is activated; when absent, the operation involves no time-bound constraints.
 
 **Not declared means it does not exist. Capabilities not declared are not authorized for any Agent.**
 
