@@ -1,10 +1,10 @@
 # CAP: Consensus Authentication Protocol
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Version](https://img.shields.io/badge/Version-0.1.0--draft-orange.svg)]() [![Status](https://img.shields.io/badge/Status-RFC%20Draft-yellow.svg)]() [![Org](https://img.shields.io/badge/Org-CommonIntents-darkgray.svg)](https://github.com/CommonIntents)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Version](https://img.shields.io/badge/Version-0.3.0--draft-orange.svg)]() [![Status](https://img.shields.io/badge/Status-RFC%20Draft-yellow.svg)]() [![Org](https://img.shields.io/badge/Org-CommonIntents-darkgray.svg)](https://github.com/CommonIntents)
 
-**Version**: 0.1.0-draft
+**Version**: 0.3.0-draft
 **Status**: Working Group Internal Draft
-**Date**: 2026-05-22
+**Date**: 2026-05-29
 **License**: Apache 2.0
 
 ---
@@ -39,58 +39,172 @@ Every CAP-compatible application MUST publish a capability manifest, declaring t
 
 ```json
 {
-  "application": "cellrix-payment",
+  "agent_name": "anaphase",
+  "version": "1.0.0",
   "actions": [
     {
-      "name": "transfer",
-      "description": "Initiate a funds transfer",
-      "securityClass": "critical",
-      "lease": {
-        "maxDuration": "15m",
-        "renewable": false
-      }
+      "id": "scrape",
+      "label": "Scrape URL",
+      "security_class": "normal",
+      "parameters": { "url": { "type": "string" } }
     },
     {
-      "name": "balance",
-      "description": "Query account balance",
-      "securityClass": "safe"
+      "id": "delete_file",
+      "label": "Delete File",
+      "security_class": "critical",
+      "lease_ms": 30000,
+      "parameters": { "path": { "type": "string" } }
     }
-  ]
-}
-```
-
-The `name` field declared in the Manifest corresponds to CIS intent syntax. `securityClass` determines whether this action requires HITL approval. When the `lease` field exists, the Lease Extension is activated; when absent, the operation involves no time-bound constraints.
-
-**Not declared means it does not exist. Capabilities not declared are not authorized for any Agent.**
-
-### 3.2 Decision Request and State Machine
-
-All operations requiring human approval enter an asynchronous queue through a standard Decision Request.
-
-```
-pending → notified → viewed → approved / rejected / modified → completed
-                                 ↘ expired (if decision expiry is set)
-```
-
-**Decision Request Standard Format:**
-
-```json
-{
-  "decision_id": "unique-identifier",
-  "action": "transfer",
-  "parameters": {},
-  "agent_id": "identity-of-requester",
-  "created_at": "timestamp",
-  "expires_at": "decision-expiry-time (optional)",
-  "context": {
-    "request_id": "idempotency-guarantee",
-    "state_hash": "hash-of-agent-execution-state",
-    "timestamp": "request-timestamp"
+  ],
+  "layout_hints": {
+    "preferred_panels": ["state_tree", "text_panel"],
+    "grid": {
+      "rows": [
+        { "id": "sidebar", "constraint": { "percentage": 0.3 } },
+        { "id": "main", "constraint": { "percentage": 0.7 } },
+        { "id": "bottom", "constraint": { "fixed_lines": 3 } }
+      ]
+    }
   }
 }
 ```
 
-The server MUST verify state consistency before execution. If inconsistent, it MUST return a `state_mismatch` error.
+**Manifest Field Description**:
+
+| Field | Type | Required | Description |
+|------|------|------|------|
+| `agent_name` | string | Yes | Human-readable name of the Agent |
+| `version` | string | Yes | Semantic version number of the Agent |
+| `actions` | array of Action | Yes | List of invocable actions |
+| `layout_hints` | LayoutHints | No | Default layout suggestions |
+
+**Action Field Description**:
+
+| Field | Type | Required | Description |
+|------|------|------|------|
+| `id` | string | Yes | Unique action identifier (maps to CIS intent name) |
+| `label` | string | Yes | Human-readable button label |
+| `security_class` | string | Yes | `"normal"` or `"critical"` |
+| `lease_ms` | u64 | No | Time-to-live (milliseconds) of HITL approval window. Declaring this field enables the lease extension. |
+| `parameters` | object | Yes | JSON Schema defining action parameter structure |
+
+**LayoutHints Field Description**:
+
+| Field | Type | Required | Description |
+|------|------|------|------|
+| `preferred_panels` | array of string | No | List of recommended node types to display |
+| `grid` | GridDefinition | No | Explicit grid layout definition |
+
+**Layout Priority (Full Override Strategy)**:
+
+Clients **MUST** select layout sources in the following priority order:
+1. `SemanticSnapshot.layout_overrides` (Highest priority, can change dynamically per snapshot)
+2. `CapabilityManifest.layout_hints` (Default layout at connection establishment)
+3. Client built-in implicit heuristics (Fallback when above two are absent)
+
+Higher-priority sources **completely override** lower-priority ones; no partial field merging is performed. This eliminates implicit conflicts caused by JSON merging and guarantees predictable client behavior.
+
+**Not declared means it does not exist. Capabilities not declared are not authorized for any Agent.**
+
+### 3.1.1 Semantic Snapshot — Agent State Projection
+
+`SemanticSnapshot` is a complete projection of the Agent's current state, pushed to clients via CIB `snapshot/update` events. It is the **only data source** for client UI rendering.
+
+#### SemanticSnapshot Structure
+| Field | Type | Required | Description |
+|------|------|------|------|
+| `epoch_time` | u64 | Yes | Snapshot timestamp (Unix seconds) |
+| `status` | string | Yes | Agent status: `"running"`, `"idle"`, `"error"` and others |
+| `metrics` | object | No | Optional metrics data |
+| `semantic_tree` | array of SemanticNode | Yes | List of UI nodes |
+| `active_focus` | string | No | Suggested current focused node ID by Agent |
+| `layout_overrides` | LayoutHints | No | Dynamic layout override (highest priority) |
+
+#### SemanticNode Structure
+| Field | Type | Required | Description |
+|------|------|------|------|
+| `id` | string | Yes | Unique node identifier |
+| `node_type` | string | Yes | Node type (see enumeration below) |
+| `label` | string | Yes | Human-readable label |
+| `content` | object | Yes | Node content data, structure determined by `node_type` |
+| `slot_binding` | string | No | Bind to a specific layout slot ID |
+| `focused` | boolean | Yes | Agent suggested focus state |
+
+#### NodeType Enumeration
+| Value | Description |
+|----|------|
+| `"state_tree"` | Hierarchical state tree |
+| `"text_panel"` | Text / Markdown panel |
+| `"action_button"` | Triggerable action button |
+| `"progress_bar"` | Progress indicator |
+| `"code_diff"` | Code difference view |
+| `"metrics"` | Numeric metrics panel |
+
+When a client encounters an unknown `node_type`, it **MUST** fall back to a debug view and render raw `content` data, and **MUST NOT** crash.
+
+### 3.2 Decision Request and State Machine
+
+All operations requiring human approval enter an asynchronous queue through a standard Action Request.
+
+**Action Request Standard Format:**
+```json
+{
+  "action_id": "delete_file",
+  "parameters": { "path": "/tmp/test.txt" },
+  "view_hash": "abc123def456...",
+  "lease_ms": 30000
+}
+```
+
+| Field | Type | Required | Description |
+|------|------|------|------|
+| `action_id` | string | Yes | Matches action `id` defined in Manifest |
+| `parameters` | object | No | Action parameters, structure defined by Manifest JSON Schema |
+| `view_hash` | string | Yes | View hash (SHA-256 hex string) of the interface seen during user confirmation |
+| `lease_ms` | u64 | No | When `lease_ms` is declared in Manifest, clients **SHOULD** carry this field to synchronize local countdown timer with Agent |
+
+**HITL Decision State Machine:**
+```
+[PENDING] → (Agent processing) → [APPROVED / DENIED / EXPIRED]
+```
+
+- **PENDING**: Waiting for human confirmation (only applies to `security_class: "critical"` actions).
+- **APPROVED**: User confirmed the action with valid `view_hash`.
+- **DENIED**: User rejected the action.
+- **EXPIRED**: Lease window timed out, action revoked.
+
+**Lease Time Contract**:
+If `lease_ms` is declared in Manifest, clients **MUST** render a visible countdown indicator on UI. Once the countdown reaches zero, the client locally discards the intent. The Agent **MUST** also mark the action as `EXPIRED`. Both sides rely on absolute lease time for state alignment, independent of network clock synchronization.
+
+### 3.2.1 View Consensus Anchor — View Hash
+
+#### Definition
+`view_hash` is a cryptographic fingerprint of the content visible to a user when signing a decision. It anchors to the **semantic layout tree**, not physical pixel coordinates. This guarantees identical hash output for the same `SemanticSnapshot` across different screen sizes and frontend implementations (TUI / WebUI).
+
+#### Algorithm: Semantic Tuple Serialization
+**Key Design Decision**: The hash input uses a **flat array with fixed index order** instead of JSON key-value map. This fundamentally eliminates inconsistent key ordering caused by different programming languages, JSON libraries and hash table implementations.
+
+#### Calculation Steps
+1. Collect all visible `SemanticNode` items.
+2. Sort nodes in lexicographical ascending order by `node.id`.
+3. Construct a deterministic array for each node:
+   ```
+   [id, node_type, label, content_hash, slot_binding, focused]
+   ```
+   - `content_hash`: Hex string of `SHA-256(canonical_json(node.content))`
+   - `slot_binding`: Set to `null` if not present
+   - `focused`: Boolean value `true` / `false`
+4. Serialize the list of arrays into a compact JSON string (no extra whitespace):
+   ```
+   [["id1","text_panel","Hello","abc123...",null,false],["id2","action_button","Go","def456...","bottom",true]]
+   ```
+5. Compute `SHA-256` over the compact string to get the final `ViewHash`.
+
+#### Cross-Platform Consistency
+Since `view_hash` excludes physical coordinates (x, y, width, height), the same `SemanticSnapshot` produces identical `view_hash` on TUI and WebUI. This is the core technical guarantee for the One-UI goal.
+
+#### Transmission
+The `ActionRequest` **MUST** carry the `view_hash` field, representing the view state when the user signed the decision. The Agent uses this value to verify that the user signed against the correct interface state.
 
 ### 3.3 Capability Handshake
 
@@ -106,8 +220,8 @@ All advanced features exist as independent extension packages. **Activated on de
 
 | Extension | Activation Condition | Function |
 |:---|:---|:---|
-| Lease Extension | `lease` field declared in Manifest | Capability time-bound constraints and renewal |
-| Expiry Extension | `expires_at` carried in Decision Request | Lifespan of the decision itself |
+| Lease Extension | `lease_ms` field declared in Manifest | Capability time-bound constraints and renewal |
+| Expiry Extension | `lease_ms` carried in Action Request | Lifespan of decision approval window |
 | Audit Extension | Enabled in Manifest or server config | Complete event audit trail |
 | Passkey Extension | `approval.method: "passkey"` declared in Manifest | Approval result requires hardware signature |
 | Delegation Extension | Defined in future CAPS phase | Capability decay and transfer |
@@ -156,6 +270,7 @@ CAP **is responsible for**:
 - Defining the HITL state machine lifecycle
 - Defining the activation mechanism for optional extensions
 - Defining the standard format for approval signatures
+- Defining SemanticSnapshot, SemanticNode and view hash specification
 
 CAP **is not responsible for**:
 - The specific implementation of the decision queue (queue infrastructure belongs to existing middleware)
