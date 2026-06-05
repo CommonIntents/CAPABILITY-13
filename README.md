@@ -1,4 +1,4 @@
-# CAPABILITY-13 — Consensus Authentication Protocol [![Org](https://img.shields.io/badge/Org-CommonIntents-144-darkgray.svg)](https://github.com/CommonIntents)
+# CAPABILITY-13 — Consensus Authentication Protocol [![Org](https://img.shields.io/badge/Org-CommonIntents--144-darkgray.svg)](https://github.com/CommonIntents)
 
 **What you see is what you sign.** CAPABILITY-13 provides a verifiable confirmation mechanism based on Cellrix's deterministic visual rendering.
 
