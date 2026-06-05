@@ -1,11 +1,11 @@
-# Contributing to CAP
+# Contributing to CAPABILITY-13
 
-CAP (Capability Authentication Protocol) is the immune system of the protocol family.
+CAPABILITY-13 (Capability Authentication Protocol) is the immune system of the protocol family.
 
 ## Specification Files
 
-- English: [spec/CAP.md](spec/CAP.md)
-- Chinese: [spec/CAP.zh-CN.md](spec/CAP.zh-CN.md)
+- English: [spec/CAPABILITY-13.md](spec/CAPABILITY-13.md)
+- Chinese: [spec/CAPABILITY-13.zh-CN.md](spec/CAPABILITY-13.zh-CN.md)
 
 ## How to Propose Changes
 

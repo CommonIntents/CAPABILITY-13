@@ -1,10 +1,10 @@
-# CAP — Consensus Authentication Protocol [![Org](https://img.shields.io/badge/Org-CommonIntents-darkgray.svg)](https://github.com/CommonIntents)
+# CAPABILITY-13 — Consensus Authentication Protocol [![Org](https://img.shields.io/badge/Org-CommonIntents-144-darkgray.svg)](https://github.com/CommonIntents)
 
-**What you see is what you sign.** CAP provides a verifiable confirmation mechanism based on Cellrix's deterministic visual rendering.
+**What you see is what you sign.** CAPABILITY-13 provides a verifiable confirmation mechanism based on Cellrix's deterministic visual rendering.
 
-CAP defines the structure of user confirmation events — carrying the visual content hash of the Cellrix interface that the user actually saw and agreed to. This bridges the semantic gap between AI intent and human authorization.
+CAPABILITY-13 defines the structure of user confirmation events — carrying the visual content hash of the Cellrix interface that the user actually saw and agreed to. This bridges the semantic gap between AI intent and human authorization.
 
-## What CAP Defines
+## What CAPABILITY-13 Defines
 - **Confirmation Event** — structured event carrying Cellrix view hash + user action
 - **Decision Queue** — asynchronous HITL (human-in-the-loop) state machine
 - **Consensus Anchor** — the Cellrix-rendered interface is the ground truth for both human and AI
@@ -17,25 +17,25 @@ CAP defines the structure of user confirmation events — carrying the visual co
 ```
 Cellrix (visual consensus layer)
   ↑
-CAP ← You are here (consensus confirmation)
+CAPABILITY-13 ← You are here (consensus confirmation)
   ↑
-CIS (intent syntax — SIDL)
+INTENT-7 (intent syntax — SIDL)
   ↑
-CIB (transport binding)
+BIND-19 (transport binding)
   ↑
-CISS (optional mTLS transport)
+INTENT-7-SECURE (optional mTLS transport)
 ```
 
 ## Read the Spec
-- [CAP v0.2.0-draft](spec/CAP.md)
-- [中文版](spec/CAP.zh-CN.md)
+- [CAPABILITY-13 v0.2.0-draft](spec/CAPABILITY-13.md)
+- [中文版](spec/CAPABILITY-13.zh-CN.md)
 
 ## Related
 | Protocol | Repository |
 |:---|:---|
-| CIS | [CommonIntents/CIS](https://github.com/CommonIntents/CIS) |
-| CIB | [CommonIntents/CIB](https://github.com/CommonIntents/CIB) |
-| CISS | [CommonIntents/CISS](https://github.com/CommonIntents/CISS) |
+| INTENT-7 | [CommonIntents-144/INTENT-7](https://github.com/CommonIntents/INTENT-7) |
+| BIND-19 | [CommonIntents-144/BIND-19](https://github.com/CommonIntents/BIND-19) |
+| INTENT-7-SECURE | [CommonIntents-144/INTENT-7-SECURE](https://github.com/CommonIntents/INTENT-7-SECURE) |
 
 ## License
 Apache 2.0 — see [LICENSE](LICENSE).

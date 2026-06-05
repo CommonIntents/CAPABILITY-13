@@ -1,6 +1,6 @@
-# CAP: Consensus Authentication Protocol
+# CAPABILITY-13: Consensus Authentication Protocol
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Version](https://img.shields.io/badge/Version-0.3.0--draft-orange.svg)]() [![Status](https://img.shields.io/badge/Status-RFC%20Draft-yellow.svg)]() [![Org](https://img.shields.io/badge/Org-CommonIntents-darkgray.svg)](https://github.com/CommonIntents)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Version](https://img.shields.io/badge/Version-0.3.0--draft-orange.svg)]() [![Status](https://img.shields.io/badge/Status-RFC%20Draft-yellow.svg)]() [![Org](https://img.shields.io/badge/Org-CommonIntents-144-darkgray.svg)](https://github.com/CommonIntents)
 
 **Version**: 0.3.0-draft
 **Status**: Working Group Internal Draft
@@ -11,31 +11,31 @@
 
 ## 1. Core Positioning
 
-CAP (Capability Authentication Protocol) is the **capability authentication and HITL decision standard**.
+CAPABILITY-13 (Capability Authentication Protocol) is the **capability authentication and HITL decision standard**.
 
 It defines "who can do what, under what conditions, within what timeframe." It transforms permissions from static passes into a dynamic, time-bound, evaluable trust process.
 
-CAP is the **consensus anchor** of the protocol stack — what you see is what you sign.
+CAPABILITY-13 is the **consensus anchor** of the protocol stack — what you see is what you sign.
 
 ---
 
-## 2. Relationship with CIS
+## 2. Relationship with INTENT-7
 
-CIS defines "what AI wants to do"; CAP defines "what AI can do, under what conditions, within what timeframe."
+INTENT-7 defines "what AI wants to do"; CAPABILITY-13 defines "what AI can do, under what conditions, within what timeframe."
 
-CIS and CAP are connected through the **Manifest** — the Manifest declares which CIS intents an application supports and the security constraints for each intent. CIS intents are the syntactic source of the `name` field in the `actions` array of the Manifest.
+INTENT-7 and CAPABILITY-13 are connected through the **Manifest** — the Manifest declares which INTENT-7 intents an application supports and the security constraints for each intent. INTENT-7 intents are the syntactic source of the `name` field in the `actions` array of the Manifest.
 
-CISS provides identity proof at the transport layer (mTLS). CAP performs dynamic authorization based on this already-proven identity.
+INTENT-7-SECURE provides identity proof at the transport layer (mTLS). CAPABILITY-13 performs dynamic authorization based on this already-proven identity.
 
 ---
 
 ## 3. Minimal Core
 
-CAP Core defines only three things, irreducible.
+CAPABILITY-13 Core defines only three things, irreducible.
 
 ### 3.1 Capability Declaration (Manifest)
 
-Every CAP-compatible application MUST publish a capability manifest, declaring the sovereign boundary of the tool.
+Every CAPABILITY-13-compatible application MUST publish a capability manifest, declaring the sovereign boundary of the tool.
 
 ```json
 {
@@ -82,7 +82,7 @@ Every CAP-compatible application MUST publish a capability manifest, declaring t
 
 | Field | Type | Required | Description |
 |------|------|------|------|
-| `id` | string | Yes | Unique action identifier (maps to CIS intent name) |
+| `id` | string | Yes | Unique action identifier (maps to INTENT-7 intent name) |
 | `label` | string | Yes | Human-readable button label |
 | `security_class` | string | Yes | `"normal"` or `"critical"` |
 | `lease_ms` | u64 | No | Time-to-live (milliseconds) of HITL approval window. Declaring this field enables the lease extension. |
@@ -108,7 +108,7 @@ Higher-priority sources **completely override** lower-priority ones; no partial 
 
 ### 3.1.1 Semantic Snapshot — Agent State Projection
 
-`SemanticSnapshot` is a complete projection of the Agent's current state, pushed to clients via CIB `snapshot/update` events. It is the **only data source** for client UI rendering.
+`SemanticSnapshot` is a complete projection of the Agent's current state, pushed to clients via BIND-19 `snapshot/update` events. It is the **only data source** for client UI rendering.
 
 #### SemanticSnapshot Structure
 | Field | Type | Required | Description |
@@ -208,7 +208,7 @@ The `ActionRequest` **MUST** carry the `view_hash` field, representing the view 
 
 ### 3.3 Capability Handshake
 
-For operations with declared time-bound constraints, the Agent MUST complete a handshake before execution — using its long-term identity key (proven by CISS mTLS) to obtain a short-lived operational credential (JWT), completing the operation within its validity window.
+For operations with declared time-bound constraints, the Agent MUST complete a handshake before execution — using its long-term identity key (proven by INTENT-7-SECURE mTLS) to obtain a short-lived operational credential (JWT), completing the operation within its validity window.
 
 **One long-term identity proof, in exchange for one time-bound operational authorization.**
 
@@ -256,15 +256,15 @@ Standard format for approval results:
 }
 ```
 
-The `signature` field is optional. When the Manifest declares `approval.method`, this field MUST be present, and the CAP server MUST verify the signature's validity before any state change.
+The `signature` field is optional. When the Manifest declares `approval.method`, this field MUST be present, and the CAPABILITY-13 server MUST verify the signature's validity before any state change.
 
-**CAP defines only the standard format of the signature, not which hardware or algorithm generates the signature.**
+**CAPABILITY-13 defines only the standard format of the signature, not which hardware or algorithm generates the signature.**
 
 ---
 
 ## 6. Protocol Boundaries
 
-CAP **is responsible for**:
+CAPABILITY-13 **is responsible for**:
 - Defining the syntax of capability declarations
 - Defining the format of decision requests and responses
 - Defining the HITL state machine lifecycle
@@ -272,28 +272,28 @@ CAP **is responsible for**:
 - Defining the standard format for approval signatures
 - Defining SemanticSnapshot, SemanticNode and view hash specification
 
-CAP **is not responsible for**:
+CAPABILITY-13 **is not responsible for**:
 - The specific implementation of the decision queue (queue infrastructure belongs to existing middleware)
 - The choice of hardware and algorithm for signatures (belongs to the implementation layer)
 - Business permission judgment logic (belongs to the application layer)
-- Identity verification (provided by CISS mTLS)
+- Identity verification (provided by INTENT-7-SECURE mTLS)
 
 ---
 
-## 7. Relationship with CISS
+## 7. Relationship with INTENT-7-SECURE
 
-CISS completes cryptographic identity proof within the first millisecond of connection establishment. CAP performs dynamic authorization and capability handshakes based on this already-proven identity.
+INTENT-7-SECURE completes cryptographic identity proof within the first millisecond of connection establishment. CAPABILITY-13 performs dynamic authorization and capability handshakes based on this already-proven identity.
 
-CISS provides a **long-term identity key** (the Agent's private key certificate). CAP issues a **short-lived operational credential** (JWT) on top of it. Long-term identity is not directly used for operational authorization; operational authorization MUST pass through a time-bound credential.
+INTENT-7-SECURE provides a **long-term identity key** (the Agent's private key certificate). CAPABILITY-13 issues a **short-lived operational credential** (JWT) on top of it. Long-term identity is not directly used for operational authorization; operational authorization MUST pass through a time-bound credential.
 
-**Platform Independence**: The CAP protocol specification itself is published via content addressing (CID), independent of any specific platform. The decision queue can be implemented using any compatible message queue infrastructure (e.g., SQLite, Redis, Kafka); the protocol does not mandate any specific technology stack.
+**Platform Independence**: The CAPABILITY-13 protocol specification itself is published via content addressing (CID), independent of any specific platform. The decision queue can be implemented using any compatible message queue infrastructure (e.g., SQLite, Redis, Kafka); the protocol does not mandate any specific technology stack.
 
 ---
 
 ## 8. Future Direction
 
-CAPS (Capability Authentication Protocol for Swarms) will, on the foundation of CAP, introduce Decentralized Identifiers (DID), Verifiable Credentials (VC), Zero-Knowledge Proofs, and a global reputation system, supporting autonomous collaboration among Agents in a network.
+CAPS (Capability Authentication Protocol for Swarms) will, on the foundation of CAPABILITY-13, introduce Decentralized Identifiers (DID), Verifiable Credentials (VC), Zero-Knowledge Proofs, and a global reputation system, supporting autonomous collaboration among Agents in a network.
 
 ---
 
-*This white paper is maintained by the CIS/CAP Protocol Working Group.*
+*This white paper is maintained by the INTENT-7/CAPABILITY-13 Protocol Working Group.*
